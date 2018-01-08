@@ -207,3 +207,4 @@ This will tag the current state under the version number described in
 metadata.json, and then bump the version there so we're ready for the next
 iteration. Finally it will `git push --tags` so travis can pick it up and
 release it to the forge!
+
