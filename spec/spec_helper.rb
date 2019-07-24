@@ -1,20 +1,44 @@
+# This file is managed via modulesync
+# https://github.com/voxpupuli/modulesync
+# https://github.com/voxpupuli/modulesync_config
+RSpec.configure do |c|
+  c.mock_with :rspec
+end
+
 require 'puppetlabs_spec_helper/module_spec_helper'
 require 'rspec-puppet-facts'
 include RspecPuppetFacts
-# From https://gist.github.com/stefanozanella/4190920
-# Make stdlib (i.e. its functions) available to rspec so our own functions that
-# require stdlib functions can load them.
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__), 'fixtures', 'modules', 'stdlib', 'lib')
 
-unless RUBY_VERSION =~ %r{^1.9}
-  require 'coveralls'
-  Coveralls.wear!
-end
-
-FIXTURES_PATH = File.expand_path(File.join(__FILE__, '..', 'fixtures'))
-
-RSpec.configure do |configuration|
-  configuration.mock_with :rspec do |c|
-    c.syntax = :expect
+if File.exist?(File.join(__dir__, 'default_module_facts.yml'))
+  facts = YAML.load(File.read(File.join(__dir__, 'default_module_facts.yml')))
+  if facts
+    facts.each do |name, value|
+      add_custom_fact name.to_sym, value
+    end
   end
 end
+
+if Dir.exist?(File.expand_path('../../lib', __FILE__))
+  require 'coveralls'
+  require 'simplecov'
+  require 'simplecov-console'
+  SimpleCov.formatters = [
+    SimpleCov::Formatter::HTMLFormatter,
+    SimpleCov::Formatter::Console
+  ]
+  SimpleCov.start do
+    track_files 'lib/**/*.rb'
+    add_filter '/spec'
+    add_filter '/vendor'
+    add_filter '/.vendor'
+  end
+end
+
+RSpec.configure do |c|
+  # Coverage generation
+  c.after(:suite) do
+    RSpec::Puppet::Coverage.report!
+  end
+end
+
+require 'spec_helper_methods'
