@@ -45,8 +45,8 @@ Puppet::Functions.create_function(:'extlib::cache_data') do
         vardir_group = File.stat(Puppet[:vardir]).gid
         File.chown(vardir_owner, vardir_group, cache)
         File.chown(vardir_owner, vardir_group, cache_dir)
-      rescue Puppet::ExecutionFailure => e
-        Puppet.debug "Couldn't set file ownership to " + vardir_owner + ":" + vardir_group + " on #{cache} or #{cache_dir}"
+      rescue
+        Puppet.info "Couldn't set file ownership to " + vardir_owner + ":" + vardir_group + " on #{cache} or #{cache_dir}"
       end
       initial_data
     end
